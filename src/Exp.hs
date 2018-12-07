@@ -4,6 +4,7 @@ import Control.Applicative
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Divisible
 import Data.Functor.Product
+import Data.List
 
 -- | Exponential/invariant functors.
 class Exp f where

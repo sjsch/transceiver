@@ -6,9 +6,12 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  build-depends:       base >=4.12 && <4.13
+  exposed-modules:     Exp, Parser, Printer, Stream
+  build-depends:       base >=4.10 && <4.13
                      , contravariant
                      , profunctors
+                     , recursion-schemes
+                     , free
                      , text
   hs-source-dirs:      src
   default-language:    Haskell2010

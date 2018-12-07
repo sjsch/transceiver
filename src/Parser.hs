@@ -27,8 +27,8 @@ instance Alternative (Parser s) where
     Just x -> Just x
     Nothing -> parse b s
 
-token :: Stream s => Parser s (Token s)
-token = Parser $ \s -> unconsStream s
+takeToken :: Stream s => Parser s (Token s)
+takeToken = Parser $ \s -> unconsStream s
 
 endStream :: Stream s => Parser s ()
 endStream = Parser $ \s -> case unconsStream s of
