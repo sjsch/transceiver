@@ -1,10 +1,10 @@
 module Exp where
 
-import Control.Applicative
-import Data.Functor.Contravariant
-import Data.Functor.Contravariant.Divisible
-import Data.Functor.Product
-import Data.Void
+import           Control.Applicative
+import           Data.Functor.Contravariant
+import           Data.Functor.Contravariant.Divisible
+import           Data.Functor.Product
+import           Data.Void
 
 -- | Exponential/invariant functors.
 class Exp f where

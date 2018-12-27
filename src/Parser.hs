@@ -1,8 +1,8 @@
 module Parser where
 
-import Control.Applicative
+import           Control.Applicative
 
-import Stream
+import           Stream
 
 newtype Parser s a
   = Parser { parse :: s -> Maybe (a, s)
@@ -32,10 +32,10 @@ takeToken = Parser $ \s -> unconsStream s
 
 endStream :: Stream s => Parser s ()
 endStream = Parser $ \s -> case unconsStream s of
-  Just _ -> Nothing
+  Just _  -> Nothing
   Nothing -> Just ((), emptyStream)
 
 satisfies :: Stream s => Parser s a -> (a -> Bool) -> Parser s a
 satisfies p f = Parser $ \s -> case parse p s of
   Just r@(a, _) -> if f a then Just r else Nothing
-  Nothing -> Nothing
+  Nothing       -> Nothing

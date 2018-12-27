@@ -1,9 +1,9 @@
 module Printer where
 
-import Data.Functor.Contravariant
-import Data.Functor.Contravariant.Divisible
+import           Data.Functor.Contravariant
+import           Data.Functor.Contravariant.Divisible
 
-import Stream
+import           Stream
 
 newtype Printer s a
   = Printer { pprint :: a -> s -> s

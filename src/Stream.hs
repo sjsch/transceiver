@@ -2,7 +2,7 @@
 
 module Stream where
 
-import Data.List
+import           Data.List
 
 class Stream s where
   type Token s
