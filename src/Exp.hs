@@ -4,7 +4,7 @@ import Control.Applicative
 import Data.Functor.Contravariant
 import Data.Functor.Contravariant.Divisible
 import Data.Functor.Product
-import Data.List
+import Data.Void
 
 -- | Exponential/invariant functors.
 class Exp f where
@@ -23,6 +23,7 @@ class Exp f => Combinable f where
 
 -- | The exponential analogue to 'Alternative' and 'Divisble'.
 class Combinable f => Pickable f where
+  pickId :: f Void
   pick :: f a -> f b -> f (Either a b)
 
 -- | The product of a contravariant and covariant functor is an
@@ -37,4 +38,5 @@ instance (Divisible c, Applicative f) => Combinable (Product c f) where
 
 -- | Exponential functor sums.
 instance (Decidable c, Alternative f) => Pickable (Product c f) where
+  pickId = Pair (lose absurd) empty
   pick (Pair a b) (Pair c d) = Pair (choose id a c) (Left <$> b <|> Right <$> d)
