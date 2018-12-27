@@ -5,7 +5,6 @@ module Syntax where
 
 import Data.Functor.Product
 import Data.Char
-import Data.Functor.Foldable
 
 import Stream
 import Printer
@@ -33,11 +32,5 @@ digit = emap
   (chr . (+ (ord '0')))
   token
 
--- newtype List a = List (Either () (Int, a))
-
--- lol :: Fix List 
--- lol = Fix (List (Right (1, Fix (List (Left ())))))
-
-digitComb p = combine digit p
-
--- list = emap Fix unfix $ pick digit
+eof :: Stream s => Syntax s ()
+eof = Pair putNothing endStream

@@ -6,7 +6,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Exp, Parser, Printer, Stream
+  exposed-modules:     Exp, Parser, Printer, Stream, Syntax
   build-depends:       base >=4.10 && <4.13
                      , contravariant
                      , profunctors

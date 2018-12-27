@@ -27,3 +27,6 @@ instance Decidable (Printer s) where
 
 putToken :: Stream s => Printer s (Token s)
 putToken = Printer $ \x s -> appendStream s x
+
+putNothing :: Stream s => Printer s ()
+putNothing = Printer $ \() s -> s
