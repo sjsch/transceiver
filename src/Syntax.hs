@@ -27,7 +27,7 @@ runPrinter (Pair p _) a = pprint p a emptyStream
 type Syn a = Syntax String a
 
 digit :: Syn Int
-digit = emap ((+ (-ord '0')) . ord) (chr . (+ (ord '0'))) token
+digit = emap ((+ (-ord '0')) . ord) (chr . (+ ord '0')) token
 
 eof :: Stream s => Syntax s ()
 eof = Pair putNothing endStream

@@ -29,14 +29,14 @@ class Combinable f => Pickable f where
 -- | The product of a contravariant and covariant functor is an
 -- exponential functor.
 instance (Contravariant c, Functor f) => Exp (Product c f) where
-  emap f g (Pair a b) = Pair (contramap g a) (fmap f b)
+  emap f g ~(Pair a b) = Pair (contramap g a) (fmap f b)
 
 -- | Exponential functor products.
 instance (Divisible c, Applicative f) => Combinable (Product c f) where
-  combineId = \x -> Pair conquer (pure x)
-  combine (Pair a b) (Pair c d) = Pair (divide id a c) ((,) <$> b <*> d)
+  combineId x = Pair conquer (pure x)
+  combine ~(Pair a b) ~(Pair c d) = Pair (divide id a c) ((,) <$> b <*> d)
 
 -- | Exponential functor sums.
 instance (Decidable c, Alternative f) => Pickable (Product c f) where
   pickId = Pair (lose absurd) empty
-  pick (Pair a b) (Pair c d) = Pair (choose id a c) (Left <$> b <|> Right <$> d)
+  pick ~(Pair a b) ~(Pair c d) = Pair (choose id a c) (Left <$> b <|> Right <$> d)
