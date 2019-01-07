@@ -2,7 +2,11 @@
 module      : Transceiver.Printer
 description : Contravariant printer combinators.
 -}
-module Transceiver.Printer where
+module Transceiver.Printer
+  ( Printer(..)
+  , printToken
+  , printEof
+  ) where
 
 import           Data.Functor.Contravariant
 import           Data.Functor.Contravariant.Divisible
@@ -28,7 +32,7 @@ instance Divisible (Printer s) where
 
 instance Decidable (Printer s) where
   lose _ = Printer $ \_ s -> s
-  choose f (Printer a) (Printer b) = Printer $ \x s -> (either a b (f x)) s
+  choose f (Printer a) (Printer b) = Printer $ \x s -> either a b (f x) s
 
 -- | Print a single token by appending it to the output stream.
 printToken :: Stream s => Printer s (Token s)

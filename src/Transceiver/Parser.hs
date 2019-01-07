@@ -2,7 +2,12 @@
 module      : Transceiver.Parser
 description : Covariant parser combinators
 -}
-module Transceiver.Parser where
+module Transceiver.Parser
+  ( Parser(..)
+  , parseToken
+  , parseEof
+  , parseSatisfy
+  ) where
 
 import           Control.Applicative
 import           Control.Monad

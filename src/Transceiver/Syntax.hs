@@ -1,13 +1,16 @@
 {-|
 module      : Transceiver.Syntax
-description : Syntax combinators main module
-              (users should import this).
+description : Syntax combinators.
 -}
-module Transceiver.Syntax where
+module Transceiver.Syntax
+  ( Syntax
+  , token
+  , runParser
+  , runPrinter
+  ) where
 
 import           Data.Functor.Product
 
-import           Data.Functor.Exp
 import           Data.Stream
 import           Transceiver.Parser
 import           Transceiver.Printer

@@ -6,7 +6,9 @@ description : List-like types that can be split into a head and a
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies      #-}
 
-module Data.Stream where
+module Data.Stream
+  ( Stream(..)
+  ) where
 
 import qualified Data.List as L
 import qualified Data.Text as T

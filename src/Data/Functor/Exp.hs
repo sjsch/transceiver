@@ -3,7 +3,12 @@ module      : Data.Functor.Exp
 description : Exponential functors, and exponential analogues for
               Applicative and Alternative functors.
 -}
-module Data.Functor.Exp where
+module Data.Functor.Exp
+  ( Exp(..)
+  , ExpProfunctor(..)
+  , Combinable(..)
+  , Pickable(..)
+  ) where
 
 import           Control.Applicative
 import           Data.Functor.Contravariant

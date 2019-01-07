@@ -11,6 +11,7 @@ library
                      , Transceiver.Parser
                      , Transceiver.Printer
                      , Transceiver.Syntax
+                     , Transceiver
   build-depends:       base >=4.10 && <4.13
                      , contravariant >=1.5 && <1.6
                      , profunctors >=5.2 && <5.4
