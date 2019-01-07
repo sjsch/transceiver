@@ -1,3 +1,8 @@
+{-|
+module      : Data.Functor.Exp
+description : Exponential functors, and exponential analogues for
+              Applicative and Alternative functors.
+-}
 module Data.Functor.Exp where
 
 import           Control.Applicative
@@ -32,16 +37,16 @@ class Combinable f =>
 
 -- | The product of a contravariant and covariant functor is an
 -- exponential functor.
-instance (Contravariant c, Functor f) => Exp (Product c f) where
-  emap f g ~(Pair a b) = Pair (contramap g a) (fmap f b)
+instance (Functor f, Contravariant c) => Exp (Product f c) where
+  emap f g ~(Pair a b) = Pair (fmap f a) (contramap g b)
 
 -- | Exponential functor products.
-instance (Divisible c, Applicative f) => Combinable (Product c f) where
-  combineId x = Pair conquer (pure x)
-  combine ~(Pair a b) ~(Pair c d) = Pair (divide id a c) ((,) <$> b <*> d)
+instance (Applicative f, Divisible c) => Combinable (Product f c) where
+  combineId x = Pair (pure x) conquer
+  combine ~(Pair a b) ~(Pair c d) = Pair ((,) <$> a <*> c) (divide id b d)
 
 -- | Exponential functor sums.
-instance (Decidable c, Alternative f) => Pickable (Product c f) where
-  pickId = Pair (lose absurd) empty
+instance (Alternative f, Decidable c) => Pickable (Product f c) where
+  pickId = Pair empty (lose absurd)
   pick ~(Pair a b) ~(Pair c d) =
-    Pair (choose id a c) (Left <$> b <|> Right <$> d)
+    Pair (Left <$> a <|> Right <$> c) (choose id b d)

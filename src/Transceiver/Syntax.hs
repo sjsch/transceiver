@@ -1,6 +1,10 @@
+{-|
+module      : Transceiver.Syntax
+description : Syntax combinators main module
+              (users should import this).
+-}
 module Transceiver.Syntax where
 
-import           Data.Char
 import           Data.Functor.Product
 
 import           Data.Functor.Exp
@@ -8,39 +12,22 @@ import           Data.Stream
 import           Transceiver.Parser
 import           Transceiver.Printer
 
-type Syntax s a = Product (Printer s) (Parser s) a
+-- | The main type representing a syntax combinator: it's just a pair
+-- with a parser and a printer.  This isn't a newtype so users can
+-- make them manually from components with 'Pair' or split them apart
+-- with pattern matching.
+type Syntax s a = Product (Parser s) (Printer s) a
 
+-- | Syntax for a single token in the IO stream.
 token :: Stream s => Syntax s (Token s)
-token = Pair putToken takeToken
+token = Pair parseToken printToken
 
-runParser :: Stream s => Syntax s a -> s -> Maybe a
-runParser (Pair _ p) s =
-  case parse p s of
-    Just (a, _) -> Just a
-    Nothing     -> Nothing
+-- | Parse the input stream 's', and if it succeeds, return the
+-- resulting 'a' and the unconsumed input.
+runParser :: Syntax s a -> s -> Maybe (a, s)
+runParser (Pair (Parser p) _) = p
 
-runPrinter :: Stream s => Syntax s a -> a -> s
-runPrinter (Pair p _) a = pprint p a emptyStream
-
-type Syn a = Syntax String a
-
-digit :: Syn Int
-digit = emap ((+ (-ord '0')) . ord) (chr . (+ ord '0')) token
-
-eof :: Stream s => Syntax s ()
-eof = Pair putNothing endStream
-
-takeMany :: Stream s => Syntax s a -> Syntax s [a]
-takeMany e = emap f g $ pick eof (takeSome e)
-  where
-    f (Left ())  = []
-    f (Right xs) = xs
-    g [] = Left ()
-    g xs = Right xs
-
-takeSome :: Stream s => Syntax s a -> Syntax s [a]
-takeSome e = emap f g $ combine e (takeMany e)
-  where
-    f = uncurry (:)
-    g (x:xs) = (x, xs)
-    g _      = error "some only works for nonempty lists"
+-- | Print an 'a', appending the results of the print with the given
+-- stream.
+runPrinter :: Syntax s a -> a -> s -> s
+runPrinter (Pair _ (Printer p)) = p

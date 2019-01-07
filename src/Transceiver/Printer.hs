@@ -1,3 +1,7 @@
+{-|
+module      : Transceiver.Printer
+description : Contravariant printer combinators.
+-}
 module Transceiver.Printer where
 
 import           Data.Functor.Contravariant
@@ -5,31 +9,31 @@ import           Data.Functor.Contravariant.Divisible
 
 import           Data.Stream
 
-newtype Printer s a = Printer
-  { pprint :: a -> s -> s
-  }
+-- | Since it's assumed that all values of the type being printed are
+-- valid, it's assumed they all have a valid representation in the
+-- output stream.
+newtype Printer s a =
+  Printer (a -> s -> s)
 
 instance Contravariant (Printer s) where
-  contramap f p = Printer $ \a s -> pprint p (f a) s
+  contramap f (Printer p) = Printer $ \a s -> p (f a) s
 
 instance Divisible (Printer s) where
   conquer = Printer $ \_ s -> s
-  divide f a b =
+  divide f (Printer a) (Printer b) =
     Printer $ \x s ->
       let (y, z) = f x
-          s' = pprint a y s
-       in pprint b z s'
+          s' = a y s
+       in b z s'
 
 instance Decidable (Printer s) where
   lose _ = Printer $ \_ s -> s
-  choose f a b =
-    Printer $ \x s ->
-      case f x of
-        Left x'  -> pprint a x' s
-        Right x' -> pprint b x' s
+  choose f (Printer a) (Printer b) = Printer $ \x s -> (either a b (f x)) s
 
-putToken :: Stream s => Printer s (Token s)
-putToken = Printer $ \x s -> appendStream s x
+-- | Print a single token by appending it to the output stream.
+printToken :: Stream s => Printer s (Token s)
+printToken = Printer $ \x s -> appendStream s x
 
-putNothing :: Stream s => Printer s ()
-putNothing = Printer $ \() s -> s
+-- | Do nothing at all to the output stream.
+printEof :: Stream s => Printer s ()
+printEof = Printer (const id)
