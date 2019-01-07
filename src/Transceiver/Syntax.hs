@@ -7,6 +7,7 @@ module Transceiver.Syntax
   , token
   , runParser
   , runPrinter
+  , eof
   ) where
 
 import           Data.Functor.Product
@@ -24,6 +25,10 @@ type Syntax s a = Product (Parser s) (Printer s) a
 -- | Syntax for a single token in the IO stream.
 token :: Stream s => Syntax s (Token s)
 token = Pair parseToken printToken
+
+-- | Succeeds in parsing /only/ the empty stream, prints nothing.
+eof :: Stream s => Syntax s ()
+eof = Pair parseEof printEof
 
 -- | Parse the input stream 's', and if it succeeds, return the
 -- resulting 'a' and the unconsumed input.
