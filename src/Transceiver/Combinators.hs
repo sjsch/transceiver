@@ -77,7 +77,7 @@ until1E a b = emap f g $ combine a (pick b (untilE a b))
 optional :: Pickable f => f a -> f (Maybe a)
 optional a = emap f g $ pick a (combineId ())
   where
-    f (Left x) = Just x
+    f (Left x)   = Just x
     f (Right ()) = Nothing
     g (Just x) = Left x
-    g Nothing = Right ()
+    g Nothing  = Right ()

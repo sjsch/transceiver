@@ -10,8 +10,12 @@ module Data.Stream
   ( Stream(..)
   ) where
 
-import qualified Data.List as L
-import qualified Data.Text as T
+import qualified Data.ByteString      as B
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.List            as L
+import qualified Data.Text            as T
+import qualified Data.Text.Lazy       as TL
+import           Data.Word
 
 -- | Anything that can be @ucons@ed or @append@ed to, and that has an
 -- empty element.  You can think of this as a monoid that can have the
@@ -34,3 +38,21 @@ instance Stream T.Text where
   emptyStream = ""
   appendStream = T.snoc
   unconsStream = T.uncons
+
+instance Stream TL.Text where
+  type Token TL.Text = Char
+  emptyStream = ""
+  appendStream = TL.snoc
+  unconsStream = TL.uncons
+
+instance Stream B.ByteString where
+  type Token B.ByteString = Word8
+  emptyStream = ""
+  appendStream = B.snoc
+  unconsStream = B.uncons
+
+instance Stream BL.ByteString where
+  type Token BL.ByteString = Word8
+  emptyStream = ""
+  appendStream = BL.snoc
+  unconsStream = BL.uncons
