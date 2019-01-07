@@ -1,8 +1,8 @@
-module Parser where
+module Transceiver.Parser where
 
 import           Control.Applicative
 
-import           Stream
+import           Data.Stream
 
 newtype Parser s a
   = Parser { parse :: s -> Maybe (a, s)

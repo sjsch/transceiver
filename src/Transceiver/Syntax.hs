@@ -1,15 +1,12 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE LiberalTypeSynonyms #-}
-
-module Syntax where
+module Transceiver.Syntax where
 
 import           Data.Functor.Product
 import           Data.Char
 
-import           Stream
-import           Printer
-import           Parser
-import           Exp
+import           Data.Stream
+import           Transceiver.Printer
+import           Transceiver.Parser
+import           Data.Functor.Exp
 
 type Syntax s a = Product (Printer s) (Parser s) a
 
@@ -31,3 +28,16 @@ digit = emap ((+ (-ord '0')) . ord) (chr . (+ ord '0')) token
 
 eof :: Stream s => Syntax s ()
 eof = Pair putNothing endStream
+
+takeMany :: Stream s => Syntax s a -> Syntax s [a]
+takeMany e = emap f g $ pick eof (takeSome e)
+  where f (Left ()) = []
+        f (Right xs) = xs
+        g [] = Left ()
+        g xs = Right xs
+
+takeSome :: Stream s => Syntax s a -> Syntax s [a]
+takeSome e = emap f g $ combine e (takeMany e)
+  where f = uncurry (:)
+        g (x:xs) = (x, xs)
+        g _ = error "some only works for nonempty lists"

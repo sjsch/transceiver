@@ -1,4 +1,4 @@
-module Exp where
+module Data.Functor.Exp where
 
 import           Control.Applicative
 import           Data.Functor.Contravariant

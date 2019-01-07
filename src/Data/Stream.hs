@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
-module Stream where
+module Data.Stream where
 
 import           Data.List
 
