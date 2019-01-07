@@ -9,10 +9,12 @@ module Transceiver
   , module Transceiver.Parser
   , module Transceiver.Printer
   , module Transceiver.Syntax
+  , module Transceiver.Combinators
   ) where
 
 import           Data.Functor.Exp
 import           Data.Stream
+import           Transceiver.Combinators
 import           Transceiver.Parser
 import           Transceiver.Printer
 import           Transceiver.Syntax
