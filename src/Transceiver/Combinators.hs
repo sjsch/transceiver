@@ -3,15 +3,46 @@ module      : Transceiver.Combinators
 description : Pure combinators that work for all exponential functors.
 -}
 module Transceiver.Combinators
-  ( untilE
+  ( manyE
+  , someE
+  , untilE
   , until1E
+  , optional
   ) where
 
 import           Data.List.NonEmpty
 
 import           Data.Functor.Exp
 
--- | Syntax combinator similar to 'Control.Applicative.many'.
+-- | Syntax combinator similar to 'Control.Applicative.many', for zero
+-- or more 'a's, until the usable IO is exhausted.
+--
+-- @
+-- [a a .. a]
+-- @
+manyE :: Pickable f => f a -> f [a]
+manyE a = emap f g $ pick (combine a (manyE a)) (combineId ())
+  where
+    f (Right ())     = []
+    f (Left (x, xs)) = x : xs
+    g []     = Right ()
+    g (x:xs) = Left (x, xs)
+
+-- | Syntax combinator similar to 'Control.Applicative.some', for one
+-- or more 'a's, until the usable IO is exhausted.
+--
+-- @
+-- a [a a .. a]
+-- @
+someE :: Pickable f => f a -> f (NonEmpty a)
+someE a = emap f g $ combine a (pick (manyE a) (combineId ()))
+  where
+    f (x, Left xs)  = x :| xs
+    f (x, Right ()) = x :| []
+    g (x :| []) = (x, Right ())
+    g (x :| xs) = (x, Left xs)
+
+-- | Syntax combinator for zero or more 'a's, until the first 'b'.
 --
 -- @
 -- [a a .. a] b
@@ -24,7 +55,7 @@ untilE a b = emap f g $ pick b (combine a (untilE a b))
     g ([], y)   = Left y
     g (x:xs, y) = Right (x, (xs, y))
 
--- | Syntax combinator similar to 'Control.Applicative.some'.
+-- | Syntax combinator for one or more 'a's, until the first 'b'.
 --
 -- @
 -- a [a a .. a] b
@@ -36,3 +67,17 @@ until1E a b = emap f g $ combine a (pick b (untilE a b))
     f (x, Right (xs, y)) = (x :| xs, y)
     g (x :| [], y) = (x, Left y)
     g (x :| xs, y) = (x, Right (xs, y))
+
+-- | Syntax combinator for an optional element.  When parsing, will
+-- return 'Nothing' when 'a' fails.
+--
+-- @
+-- [a]
+-- @
+optional :: Pickable f => f a -> f (Maybe a)
+optional a = emap f g $ pick a (combineId ())
+  where
+    f (Left x) = Just x
+    f (Right ()) = Nothing
+    g (Just x) = Left x
+    g Nothing = Right ()
