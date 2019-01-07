@@ -17,12 +17,16 @@ class ExpProfunctor p where
 
 -- | The exponential analogue to 'Applicative' covariant functors or
 -- 'Divisible' contravariant functors.
-class Exp f => Combinable f where
+class Exp f =>
+      Combinable f
+  where
   combineId :: a -> f a
   combine :: f a -> f b -> f (a, b)
 
 -- | The exponential analogue to 'Alternative' and 'Divisble'.
-class Combinable f => Pickable f where
+class Combinable f =>
+      Pickable f
+  where
   pickId :: f Void
   pick :: f a -> f b -> f (Either a b)
 
@@ -39,4 +43,5 @@ instance (Divisible c, Applicative f) => Combinable (Product c f) where
 -- | Exponential functor sums.
 instance (Decidable c, Alternative f) => Pickable (Product c f) where
   pickId = Pair (lose absurd) empty
-  pick ~(Pair a b) ~(Pair c d) = Pair (choose id a c) (Left <$> b <|> Right <$> d)
+  pick ~(Pair a b) ~(Pair c d) =
+    Pair (choose id a c) (Left <$> b <|> Right <$> d)

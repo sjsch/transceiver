@@ -1,3 +1,8 @@
+{-
+module      : Data.Stream
+description : Typeclass for list-like types that can be split into a
+              head and a tail, and append to.
+-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Data.Stream where
