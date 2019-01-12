@@ -8,9 +8,10 @@ module Transceiver.Combinators
   , untilE
   , until1E
   , optional
+  , repeatN
   ) where
 
-import           Data.List.NonEmpty
+import           Data.List.NonEmpty ( NonEmpty(..) )
 
 import           Data.Functor.Exp
 
@@ -81,3 +82,13 @@ optional a = emap f g $ pick a (combineId ())
     f (Right ()) = Nothing
     g (Just x) = Left x
     g Nothing  = Right ()
+
+repeatN :: Combinable f => Int -> f a -> f [a]
+repeatN 0 _ = combineId []
+repeatN n a = emap f g $ combine a (repeatN (n-1) a)
+  where
+    f = uncurry (:)
+    g [] = error "repeatN ran out of items"
+    g (x:xs) = (x, xs)
+
+-- listLength :: Pickable

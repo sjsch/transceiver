@@ -38,6 +38,12 @@ instance Alternative (Parser s) where
   empty = Parser (const Nothing)
   (Parser a) <|> (Parser b) = Parser $ \s -> a s <|> b s
 
+instance Monad (Parser s) where
+  (Parser a) >>= f = Parser $ \s -> do
+    (a', s') <- a s
+    let Parser b = f a'
+    b s'
+
 -- | Parse one token from the input stream, failing only if the input
 -- is empty.
 parseToken :: Stream s => Parser s (Token s)
