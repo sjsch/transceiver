@@ -6,10 +6,12 @@ module Transceiver.Printer
   ( Printer(..)
   , printToken
   , printEof
+  , printInsert
   ) where
 
 import           Data.Functor.Contravariant
 import           Data.Functor.Contravariant.Divisible
+import           Data.Functor.Exp
 
 import           Data.Stream
 
@@ -33,6 +35,18 @@ instance Divisible (Printer s) where
 instance Decidable (Printer s) where
   lose _ = Printer $ \_ s -> s
   choose f (Printer a) (Printer b) = Printer $ \x s -> either a b (f x) s
+
+instance Contramonad (Printer s) where
+  pairbind (Printer a) f =
+    Printer $ \(x, y) s ->
+      let s' = a x s
+          Printer b = f x
+       in b y s'
+
+-- | Insert @x@ into the output stream, without actually needing it as
+-- an input.
+printInsert :: Stream s => Token s -> Printer s ()
+printInsert x = Printer $ \() s -> appendStream s x
 
 -- | Print a single token by appending it to the output stream.
 printToken :: Stream s => Printer s (Token s)

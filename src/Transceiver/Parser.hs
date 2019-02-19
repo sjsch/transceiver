@@ -39,10 +39,11 @@ instance Alternative (Parser s) where
   (Parser a) <|> (Parser b) = Parser $ \s -> a s <|> b s
 
 instance Monad (Parser s) where
-  (Parser a) >>= f = Parser $ \s -> do
-    (a', s') <- a s
-    let Parser b = f a'
-    b s'
+  (Parser a) >>= f =
+    Parser $ \s -> do
+      (a', s') <- a s
+      let Parser b = f a'
+      b s'
 
 -- | Parse one token from the input stream, failing only if the input
 -- is empty.

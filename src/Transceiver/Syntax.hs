@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 {-|
 module      : Transceiver.Syntax
 description : Syntax combinators.
@@ -8,8 +10,12 @@ module Transceiver.Syntax
   , runParser
   , runPrinter
   , eof
+  , exactLiteral
+  , exactToken
   ) where
 
+import           Data.Functor
+import           Data.Functor.Exp
 import           Data.Functor.Product
 
 import           Data.Stream
@@ -30,12 +36,23 @@ token = Pair parseToken printToken
 eof :: Stream s => Syntax s ()
 eof = Pair parseEof printEof
 
--- | Parse the input stream 's', and if it succeeds, return the
--- resulting 'a' and the unconsumed input.
+-- | Syntax for an exact match of a single token.  Produces/consumes
+-- an '()' because an exact match carries no information.
+exactToken :: (Stream s, Eq (Token s)) => Token s -> Syntax s ()
+exactToken x = Pair (void $ parseSatisfy parseToken (== x)) (printInsert x)
+
+-- | Syntax for an exact match of a sequence of tokens, like 'exactToken'.
+exactLiteral :: (Stream s, Eq (Token s)) => [Token s] -> Syntax s ()
+exactLiteral [] = combineId ()
+exactLiteral (x:xs) =
+  emap (const ()) (const ((), ())) $ combine (exactToken x) (exactLiteral xs)
+
+-- | Parse the input stream @s@, and if it succeeds, return the
+-- resulting @a@ and the unconsumed input.
 runParser :: Syntax s a -> s -> Maybe (a, s)
 runParser (Pair (Parser p) _) = p
 
--- | Print an 'a', appending the results of the print with the given
+-- | Print an @a@, appending the results of the print with the given
 -- stream.
 runPrinter :: Syntax s a -> a -> s -> s
 runPrinter (Pair _ (Printer p)) = p

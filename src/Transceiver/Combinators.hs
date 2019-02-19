@@ -11,12 +11,12 @@ module Transceiver.Combinators
   , repeatN
   ) where
 
-import           Data.List.NonEmpty ( NonEmpty(..) )
+import           Data.List.NonEmpty (NonEmpty (..))
 
 import           Data.Functor.Exp
 
 -- | Syntax combinator similar to 'Control.Applicative.many', for zero
--- or more 'a's, until the usable IO is exhausted.
+-- or more @a@s, until the usable IO is exhausted.
 --
 -- @
 -- [a a .. a]
@@ -30,7 +30,7 @@ manyE a = emap f g $ pick (combine a (manyE a)) (combineId ())
     g (x:xs) = Left (x, xs)
 
 -- | Syntax combinator similar to 'Control.Applicative.some', for one
--- or more 'a's, until the usable IO is exhausted.
+-- or more @a@s, until the usable IO is exhausted.
 --
 -- @
 -- a [a a .. a]
@@ -43,7 +43,7 @@ someE a = emap f g $ combine a (pick (manyE a) (combineId ()))
     g (x :| []) = (x, Right ())
     g (x :| xs) = (x, Left xs)
 
--- | Syntax combinator for zero or more 'a's, until the first 'b'.
+-- | Syntax combinator for zero or more @a@s, until the first @b@.
 --
 -- @
 -- [a a .. a] b
@@ -56,7 +56,7 @@ untilE a b = emap f g $ pick b (combine a (untilE a b))
     g ([], y)   = Left y
     g (x:xs, y) = Right (x, (xs, y))
 
--- | Syntax combinator for one or more 'a's, until the first 'b'.
+-- | Syntax combinator for one or more @a@s, until the first @b@.
 --
 -- @
 -- a [a a .. a] b
@@ -70,7 +70,7 @@ until1E a b = emap f g $ combine a (pick b (untilE a b))
     g (x :| xs, y) = (x, Right (xs, y))
 
 -- | Syntax combinator for an optional element.  When parsing, will
--- return 'Nothing' when 'a' fails.
+-- return 'Nothing' when @a@ fails.
 --
 -- @
 -- [a]
@@ -83,12 +83,15 @@ optional a = emap f g $ pick a (combineId ())
     g (Just x) = Left x
     g Nothing  = Right ()
 
+-- | Syntax for @n@ repeated instances of @a@.
+--
+-- @
+-- a1 a2 ... an
+-- @
 repeatN :: Combinable f => Int -> f a -> f [a]
 repeatN 0 _ = combineId []
-repeatN n a = emap f g $ combine a (repeatN (n-1) a)
+repeatN n a = emap f g $ combine a (repeatN (n - 1) a)
   where
     f = uncurry (:)
-    g [] = error "repeatN ran out of items"
+    g []     = error "repeatN ran out of items"
     g (x:xs) = (x, xs)
-
--- listLength :: Pickable

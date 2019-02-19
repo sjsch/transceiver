@@ -8,6 +8,8 @@ module Data.Functor.Exp
   , ExpProfunctor(..)
   , Combinable(..)
   , Pickable(..)
+  , Contramonad(..)
+  , Constructable(..)
   ) where
 
 import           Control.Applicative
@@ -33,12 +35,28 @@ class Exp f =>
   combineId :: a -> f a
   combine :: f a -> f b -> f (a, b)
 
--- | The exponential analogue to 'Alternative' and 'Divisble'.
+-- | The exponential analogue to 'Alternative' and
+-- 'Data.Functor.Contravariant.Divisble'.
 class Combinable f =>
       Pickable f
   where
   pickId :: f Void
   pick :: f a -> f b -> f (Either a b)
+
+-- | A sort-of monad analogue for contravariant functors.  If 'f a'
+-- consumes an @a@, and there is a function from @a@ to a consumer @f b@,
+-- 'pairbind' makes a consumer for an @f (a, b)@.
+class Divisible f =>
+      Contramonad f
+  where
+  pairbind :: f a -> (a -> f b) -> f (a, b)
+
+-- | A sort-of- monad analogue for exponential functors, similar to
+-- 'Contramonad'.
+class Combinable f =>
+      Constructable f
+  where
+  construct :: f a -> (a -> f b) -> f (a, b)
 
 -- | The product of a contravariant and covariant functor is an
 -- exponential functor.
@@ -55,3 +73,15 @@ instance (Alternative f, Decidable c) => Pickable (Product f c) where
   pickId = Pair empty (lose absurd)
   pick ~(Pair a b) ~(Pair c d) =
     Pair (Left <$> a <|> Right <$> c) (choose id b d)
+
+-- | Exponential functors are constructable.  (This is necessary for
+-- earlier data to affect parsing/printing later on, like 'Monad' for
+-- traditional monadic parser combinators.)
+instance (Monad f, Contramonad c) => Constructable (Product f c) where
+  construct ~(Pair a b) f =
+    let a' = a >>= \x -> (,) <$> pure x <*> pfst (f x)
+        b' = pairbind b (psnd . f)
+     in Pair a' b'
+    where
+      pfst (Pair x _) = x
+      psnd (Pair _ x) = x
