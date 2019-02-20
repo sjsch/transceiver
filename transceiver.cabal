@@ -1,9 +1,14 @@
 name:                transceiver
+category:            Data
+license:             MIT
+license-file:        LICENSE
 version:             0.1.0.0
 author:              Sam Schweigel
 maintainer:          s.schweigel@gmail.com
 build-type:          Simple
 cabal-version:       >=1.10
+homepage:            http://github.com/sjsch/transceiver/
+synopsis:            Bidirectional syntax combinators.
 
 library
   exposed-modules:     Data.Functor.Exp

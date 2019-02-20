@@ -13,15 +13,30 @@ cache:
   directories:
     - "$HOME/.cabal"
 
-script:
-  - cabal v2-install --enable-documentation --only-dependencies .
-  - cabal v2-haddock --haddock-quickjump --haddock-hyperlink-source --haddock-html-location='http://hackage.haskell.org/packages/archive/$pkg/latest/doc/html'
+before_install:
+  - "PATH=/opt/ghc/bin:/opt/ghc-ppa-tools/bin:$HOME/local/bin:$PATH"
 
-# deploy:
-#   provider: pages
-#   skip-cleanup: true
-#   github-token: $GITHUB_TOKEN
-#   keep-history: false
-#   local-dir: doc
-#   on:
-#     branch: master
+before_cache:
+  - rm -fv $HOME/.cabal/packages/hackage.haskell.org/build-reports.log
+  - rm -fv $HOME/.cabal/packages/hackage.haskell.org/00-index.*
+  - rm -fv $HOME/.cabal/packages/hackage.haskell.org/*.json
+  - rm -fv $HOME/.cabal/packages/hackage.haskell.org/01-index.cache
+  - rm -fv $HOME/.cabal/packages/hackage.haskell.org/01-index.tar
+  - rm -fv $HOME/.cabal/packages/hackage.haskell.org/01-index.tar.idx
+  - rm -rfv $HOME/.cabal/packages/head.hackage
+
+script:
+  - cabal v2-update
+  - cabal v2-install --enable-documentation --only-dependencies .
+  - cabal v2-build
+  - cabal v2-haddock --haddock-quickjump --haddock-hyperlink-source --haddock-html-location='http://hackage.haskell.org/packages/archive/$pkg/latest/doc/html'
+  - mv dist-newstyle/build/x86_64-linux/ghc-8.6.3/transceiver-0.1.0.0/doc/html/transceiver doc
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: false
+  local-dir: doc
+  on:
+    branch: master
