@@ -1,0 +1,27 @@
+sudo: false
+language: generic
+
+addons:
+  apt:
+    sources:
+      - hvr-ghc
+    packages:
+      - ghc-8.6.3
+      - cabal-install-2.4 
+
+cache:
+  directories:
+    - "$HOME/.cabal"
+
+script:
+  - cabal v2-install --enable-documentation --only-dependencies .
+  - cabal v2-haddock --haddock-quickjump --haddock-hyperlink-source --haddock-html-location='http://hackage.haskell.org/packages/archive/$pkg/latest/doc/html'
+
+# deploy:
+#   provider: pages
+#   skip-cleanup: true
+#   github-token: $GITHUB_TOKEN
+#   keep-history: false
+#   local-dir: doc
+#   on:
+#     branch: master
