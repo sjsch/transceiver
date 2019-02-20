@@ -9,6 +9,8 @@ module Transceiver.Combinators
   , until1E
   , optional
   , repeatN
+  , constant
+  , padding
   ) where
 
 import           Data.List.NonEmpty (NonEmpty (..))
@@ -95,3 +97,27 @@ repeatN n a = emap f g $ combine a (repeatN (n - 1) a)
     f = uncurry (:)
     g []     = error "repeatN ran out of items"
     g (x:xs) = (x, xs)
+
+-- | Disregard the information from the covariant functor, and replace
+-- the information in the contravariaint functor with @x@.
+--
+-- For syntax combinators, this ignores the parsed token and prints
+-- the same thing every time.
+constant :: Exp f => a -> f a -> f ()
+constant x = emap (const ()) (const x)
+
+-- | Syntax combinator that disregards @n@ @t@s, and prints @n@ @f@s.
+--
+-- Parsing:
+--
+-- @
+-- _1 _2 ... _n
+-- @
+--
+-- Printing:
+--
+-- @
+-- f1 f2 ... f3
+-- @
+padding :: Combinable f => Int -> a -> f a -> f ()
+padding n f t = constant (replicate n ()) $ repeatN n (constant f t)
