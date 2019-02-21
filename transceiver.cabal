@@ -19,6 +19,7 @@ library
                      , Transceiver.Syntax.Word8
                      , Transceiver.Combinators
                      , Transceiver.Iso
+                     , Transceiver.Operators
                      , Transceiver
   build-depends:       base >=4.10 && <4.13
                      , contravariant >=1.5 && <1.6

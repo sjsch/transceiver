@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 {-|
 module      : Transceiver.Combinators
 description : Pure combinators that work for all exponential functors.
@@ -11,6 +13,8 @@ module Transceiver.Combinators
   , repeatN
   , constant
   , padding
+  , sequenceL
+  , sequenceR
   ) where
 
 import           Data.List.NonEmpty (NonEmpty (..))
@@ -121,3 +125,19 @@ constant x = emap (const ()) (const x)
 -- @
 padding :: Combinable f => Int -> a -> f a -> f ()
 padding n f t = constant (replicate n ()) $ repeatN n (constant f t)
+
+-- | Assuming @a@ carries no information, sequence @a@ and @b@, like '<*'
+--
+-- @
+-- a b
+-- @
+sequenceL :: Combinable f => f a -> f () -> f a
+sequenceL a b = emap fst (, ()) $ combine a b
+
+-- | Assuming @b@ carries no information, sequence @a@ and @b@, like '*>'
+--
+-- @
+-- a b
+-- @
+sequenceR :: Combinable f => f () -> f a -> f a
+sequenceR b a = emap snd ((), ) $ combine b a

@@ -7,11 +7,14 @@ description : Syntax combinators.
 module Transceiver.Syntax
   ( Syntax
   , token
+  , runParser'
+  , runPrinter'
   , runParser
   , runPrinter
   , eof
-  , exactLiteral
+  , literal
   , exactToken
+  , satisfy
   ) where
 
 import           Data.Functor
@@ -42,17 +45,31 @@ exactToken :: (Stream s, Eq (Token s)) => Token s -> Syntax s ()
 exactToken x = Pair (void $ parseSatisfy parseToken (== x)) (printInsert x)
 
 -- | Syntax for an exact match of a sequence of tokens, like 'exactToken'.
-exactLiteral :: (Stream s, Eq (Token s)) => [Token s] -> Syntax s ()
-exactLiteral [] = combineId ()
-exactLiteral (x:xs) =
-  emap (const ()) (const ((), ())) $ combine (exactToken x) (exactLiteral xs)
+literal :: (Stream s, Eq (Token s)) => [Token s] -> Syntax s ()
+literal [] = combineId ()
+literal (x:xs) =
+  emap (const ()) (const ((), ())) $ combine (exactToken x) (literal xs)
+
+-- | Only suceed in parsing if the predicate @f@ is satisfied.  This
+-- /assumes/ that the predicate will always hold when printing.
+satisfy ::
+     Stream s => (a -> Bool) -> Product (Parser s) g a -> Product (Parser s) g a
+satisfy f (Pair x y) = Pair (parseSatisfy x f) y
 
 -- | Parse the input stream @s@, and if it succeeds, return the
 -- resulting @a@ and the unconsumed input.
-runParser :: Syntax s a -> s -> Maybe (a, s)
-runParser (Pair (Parser p) _) = p
+runParser' :: Syntax s a -> s -> Maybe (a, s)
+runParser' (Pair (Parser p) _) = p
 
 -- | Print an @a@, appending the results of the print with the given
 -- stream.
-runPrinter :: Syntax s a -> a -> s -> s
-runPrinter (Pair _ (Printer p)) = p
+runPrinter' :: Syntax s a -> a -> s -> s
+runPrinter' (Pair _ (Printer p)) = p
+
+-- | Same as 'runParser', but discard the unused stream.
+runParser :: Syntax s a -> s -> Maybe a
+runParser p = fmap fst . runParser' p
+
+-- | Same as 'runPrinter', but append to the empty stream.
+runPrinter :: Stream s => Syntax s a -> a -> s
+runPrinter p x = runPrinter' p x emptyStream
