@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ViewPatterns     #-}
 
 {-|
 module      : Transceiver.Syntax
@@ -45,10 +46,10 @@ exactToken :: (Stream s, Eq (Token s)) => Token s -> Syntax s ()
 exactToken x = Pair (void $ parseSatisfy parseToken (== x)) (printInsert x)
 
 -- | Syntax for an exact match of a sequence of tokens, like 'exactToken'.
-literal :: (Stream s, Eq (Token s)) => [Token s] -> Syntax s ()
-literal [] = combineId ()
-literal (x:xs) =
-  emap (const ()) (const ((), ())) $ combine (exactToken x) (literal xs)
+literal :: (Stream s, Eq (Token s)) => s -> Syntax s ()
+literal (unconsStream -> Just (t, ts)) =
+  emap (const ()) (const ((), ())) $ combine (exactToken t) (literal ts)
+literal _ = combineId ()
 
 -- | Only suceed in parsing if the predicate @f@ is satisfied.  This
 -- /assumes/ that the predicate will always hold when printing.
