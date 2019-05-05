@@ -15,6 +15,9 @@ module Transceiver.Combinators
   , padding
   , sequenceL
   , sequenceR
+  , sepBy
+  , sepBy1
+  , between
   ) where
 
 import           Data.List.NonEmpty (NonEmpty (..))
@@ -141,3 +144,20 @@ sequenceL a b = emap fst (, ()) $ combine a b
 -- @
 sequenceR :: Combinable f => f () -> f a -> f a
 sequenceR b a = emap snd ((), ) $ combine b a
+
+sepBy1 :: Pickable f => f a -> f () -> f (NonEmpty a)
+sepBy1 p s = emap f g $ combine p (manyE $ sequenceR s p)
+  where
+    f = uncurry (:|)
+    g (x :| y) = (x, y)
+
+sepBy :: Pickable f => f a -> f () -> f [a]
+sepBy p s = emap f g $ pick (sepBy1 p s) (combineId ())
+  where
+    f (Right ())      = []
+    f (Left (x :| y)) = x : y
+    g []    = Right ()
+    g (x:y) = Left (x :| y)
+
+between :: Combinable f => f () -> f () -> f a -> f a
+between l r p = sequenceR l (sequenceL p r)

@@ -17,6 +17,7 @@ library
                      , Transceiver.Printer
                      , Transceiver.Syntax
                      , Transceiver.Syntax.Word8
+                     , Transceiver.Syntax.Char
                      , Transceiver.Combinators
                      , Transceiver.Iso
                      , Transceiver.Operators
