@@ -8,6 +8,7 @@ description : Syntax combinators for dealing with bytestrings.
 module Transceiver.Syntax.Word8
   ( syntaxLE
   , asciiNatural
+  , lenList
   ) where
 
 import           Data.Bits
@@ -49,3 +50,11 @@ asciiNatural = emap f g $ someE $ satisfy (isNumber . chr . fromIntegral) token
   where
     f = read . fmap (chr . fromIntegral) . NE.toList
     g = NE.fromList . fmap (fromIntegral . ord) . show
+
+lenList ::
+     (Stream s, Token s ~ Word8, FiniteBits n, Integral n, Num n)
+  => Syntax s n
+  -> Syntax s a
+  -> Syntax s [a]
+lenList n a = emap snd (\x -> (fromIntegral $ length x, x)) $
+  construct n (flip repeatN a . fromIntegral)
