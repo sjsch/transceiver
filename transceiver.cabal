@@ -19,7 +19,6 @@ library
                      , Transceiver.Syntax.Word8
                      , Transceiver.Syntax.Char
                      , Transceiver.Combinators
-                     , Transceiver.Iso
                      , Transceiver.Operators
                      , Transceiver
   build-depends:       base >=4.10 && <4.13

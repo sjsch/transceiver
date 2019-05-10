@@ -56,5 +56,6 @@ lenList ::
   => Syntax s n
   -> Syntax s a
   -> Syntax s [a]
-lenList n a = emap snd (\x -> (fromIntegral $ length x, x)) $
+lenList n a =
+  emap snd (\x -> (fromIntegral $ length x, x)) $
   construct n (flip repeatN a . fromIntegral)

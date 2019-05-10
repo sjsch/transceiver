@@ -35,5 +35,5 @@ float = emap f g $ digits |*| optional (exactToken '.') |*| optional digits
   where
     digits = someE (satisfy isNumber token)
     -- this really needs to be cleaned up
-    f (x1, (_, x2)) = read $ (toList x1) ++ maybe "" ("." ++) (toList <$> x2)
+    f (x1, (_, x2)) = read $ toList x1 ++ maybe "" ("." ++) (toList <$> x2)
     g x = (fromList (show x), (Nothing, Nothing))
