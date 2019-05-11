@@ -19,13 +19,16 @@ library
                      , Transceiver.Syntax.Word8
                      , Transceiver.Syntax.Char
                      , Transceiver.Combinators
+                     , Transceiver.Iso
                      , Transceiver.Operators
                      , Transceiver
   build-depends:       base >=4.10 && <4.13
+                     , bytestring >=0.10 && <0.11
                      , contravariant >=1.5 && <1.6
                      , profunctors >=5.2 && <5.4
+                     , template-haskell >= 2.14.0.0
                      , text >=1.2 && <1.3
-                     , bytestring >=0.10 && <0.11
+                     , type-level-sets
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall
