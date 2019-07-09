@@ -1,58 +1,66 @@
-{-# LANGUAGE DataKinds            #-}
-{-# LANGUAGE DeriveGeneric        #-}
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE ScopedTypeVariables  #-}
-{-# LANGUAGE TypeApplications     #-}
-{-# LANGUAGE TypeFamilies         #-}
-{-# LANGUAGE TypeOperators        #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE KindSignatures        #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE TypeApplications      #-}
+{-# LANGUAGE TypeOperators         #-}
 
-module Transceiver.Fields where
+module Transceiver.Fields
+  ( fld, con
+  , (|&|), (|/|)
+  , (=&), (=/)
+  ) where
+
+import           Data.NamedSOP.Map
+import           Data.NamedSOP.Sum
+import           Data.Proxy
+import           GHC.OverloadedLabels
+import           GHC.TypeLits
 
 import           Data.Functor.Exp
 
-import           Data.Type.Map         hiding (Combinable)
-import           GHC.Generics
-import           GHC.TypeLits
-
-data A =
-  A
-    { aOne :: Int
-    , aTwo :: Bool
-    }
-  deriving (Eq, Ord, Show, Generic)
-
-newtype Fields m e =
-  Fields (e (Map m))
-
-fld ::
-     forall n a e. Exp e
-  => e a
-  -> Fields '[ n ':-> a] e
-fld x = Fields $ emap f g x
+fld :: forall k v f. Exp f => f v -> f (NMap '[ k ':-> v ])
+fld v = emap f g v
   where
-    f y = Ext (Var @n) y Empty
-    g = lookp (Var @n)
+    f x = NMapExt x NMapEmpty
 
-class Con (f :: * -> *) where
-  type ConFields f :: [Mapping Symbol *]
-  toCon :: f a -> Map (ConFields f)
-  fromCon :: Map (ConFields f) -> f a
+    g :: NMap '[ k ':-> v ] -> v
+    g (NMapExt x NMapEmpty) = x
 
-instance Con (M1 S ('MetaSel ('Just s) _a _b _c) (Rec0 t)) where
-  type ConFields (M1 S ('MetaSel ('Just s) _a _b _c) (Rec0 t)) = '[ s ':-> t]
-  toCon (M1 (K1 x)) = Ext Var x Empty
-  fromCon m = M1 (K1 (lookp (Var @s) m))
+con :: forall k v f. Exp f => f v -> f (NSum '[ k ':-> v])
+con v = emap f g v
+  where
+    f x = NSumThis x
 
-instance ( Unionable (ConFields a) (ConFields b)
-         , Split (ConFields a) (ConFields b) (Union (ConFields a) (ConFields b))
-         , Con a
-         , Con b
-         ) =>
-         Con (a :*: b) where
-  type ConFields (a :*: b) = Union (ConFields a) (ConFields b)
-  toCon (x :*: y) = toCon x `union` toCon y
-  fromCon m =
-    let (m1, m2) = split m
-     in fromCon m1 :*: fromCon m2
+    g :: NSum '[ k ':-> v ] -> v
+    g (NSumThis x) = x
+    g (NSumThat _) = error "unreachable"
+
+infixr 5 |&|
+(|&|) :: forall xs ys f. (SingI xs, SingI ys, Combinable f) =>
+  f (NMap xs) -> f (NMap ys) -> f (NMap (Union xs ys))
+x |&| y = emap unionMap ununionMap (combine x y)
+
+infixr 3 |/|
+(|/|):: forall xs ys f. (SingI xs, SingI ys, Pickable f) =>
+  f (NSum xs) -> f (NSum ys) -> f (NSum (Union xs ys))
+x |/| y = emap unionSum ununionSum (pick x y)
+
+data FieldLabel (n :: Symbol) = FieldLabel
+  deriving (Eq, Ord)
+
+instance KnownSymbol n => Show (FieldLabel n) where
+  show FieldLabel = "FieldLabel @\"" ++ symbolVal (Proxy :: Proxy n) ++ "\""
+
+instance (n ~ m) => IsLabel n (FieldLabel m) where
+  fromLabel = FieldLabel @n
+
+infixl 6 =&
+(=&) :: forall n a f. Exp f => f a -> FieldLabel n -> f (NMap '[n ':-> a])
+f =& FieldLabel = fld @n f
+
+infixl 4 =/
+(=/) :: forall n a f. Exp f => f a -> FieldLabel n -> f (NSum '[n ':-> a])
+f =/ FieldLabel = con @n f
