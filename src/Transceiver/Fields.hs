@@ -1,5 +1,5 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE GADTs                 #-}
 {-# LANGUAGE KindSignatures        #-}
@@ -12,17 +12,17 @@ module Transceiver.Fields
   ( fld, con
   , (|&|), (|/|)
   , (=&), (=/)
-  , pmap
+  , pmap, smap
   , Generic
   ) where
 
+import           Data.NamedSOP.Generic
 import           Data.NamedSOP.Map
 import           Data.NamedSOP.Sum
-import           Data.NamedSOP.Generic
 import           Data.Proxy
+import           GHC.Generics
 import           GHC.OverloadedLabels
 import           GHC.TypeLits
-import           GHC.Generics
 
 import           Data.Functor.Exp
 
@@ -73,3 +73,7 @@ f =/ FieldLabel = con @n f
 pmap :: (Exp f, Generic a, GenProduct (Rep a)) =>
   f (NMap (GProduct (Rep a))) -> f a
 pmap = emap specProduct genProduct
+
+smap :: (Exp f, Generic a, GenSum (Rep a)) =>
+  f (NSum (GSum (Rep a))) -> f a
+smap = emap specSum genSum
