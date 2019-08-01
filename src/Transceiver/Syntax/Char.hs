@@ -4,6 +4,8 @@ module Transceiver.Syntax.Char
   ( natural
   , signed
   , float
+  , escapedChar
+  , stringLit
   ) where
 
 import           Data.Char
@@ -37,3 +39,19 @@ float = emap f g $ digits |*| optional (exactToken '.') |*| optional digits
     -- this really needs to be cleaned up
     f (x1, (_, x2)) = read $ toList x1 ++ maybe "" ("." ++) (toList <$> x2)
     g x = (fromList (show x), (Nothing, Nothing))
+
+escapedChar :: (Stream s, Token s ~ Char) => Syntax s Char
+escapedChar = emap f g $
+  exactToken '\\' |>| token |+| satisfy (not . (`elem` esc)) token
+  where
+    f (Left c) = c
+    f (Right c) = c
+
+    g c = if c `elem` esc then Left c else Right c
+
+    esc = "\\\"'"
+
+stringLit :: (Stream s, Token s ~ Char) => Syntax s String
+stringLit = between q q (manyE escapedChar)
+  where
+    q = exactToken '"'
