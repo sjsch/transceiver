@@ -161,3 +161,5 @@ sepBy p s = emap f g $ pick (sepBy1 p s) (combineId ())
 
 between :: Combinable f => f () -> f () -> f a -> f a
 between l r p = sequenceR l (sequenceL p r)
+
+{-# INLINE repeatN #-}

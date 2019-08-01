@@ -74,3 +74,5 @@ runParser p = fmap fst . runParser' p
 -- | Same as 'runPrinter', but append to the empty stream.
 runPrinter :: Stream s => Syntax s a -> a -> s
 runPrinter p x = runPrinter' p x emptyStream
+
+{-# INLINE token #-}

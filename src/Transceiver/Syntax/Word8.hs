@@ -59,3 +59,7 @@ lenList ::
 lenList n a =
   emap snd (\x -> (fromIntegral $ length x, x)) $
   construct n (flip repeatN a . fromIntegral)
+
+{-# INLINE syntaxLE #-}
+{-# INLINE foldLE #-}
+{-# INLINE unfoldLE #-}
